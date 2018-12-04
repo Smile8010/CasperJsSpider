@@ -3,3 +3,17 @@
 ################################################################################
 
 /.vs
+/CasperJsSpider.Business/bin
+/CasperJsSpider.Business/obj
+/CasperJsSpider.Comom/bin
+/CasperJsSpider.Comom/obj
+/CasperJsSpider.Repository/bin
+/CasperJsSpider.Repository/obj
+/CasperJsSpider.SqlLiteDomain/bin
+/CasperJsSpider.SqlLiteDomain/obj
+/CasperJsSpiderApp/bin
+/CasperJsSpiderApp/obj
+/CasperJsSpiderWin/bin
+/CasperJsSpiderWin/obj
+/db/spider.db
+/packages
