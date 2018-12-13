@@ -17,3 +17,6 @@
 /CasperJsSpiderWin/obj
 /db/spider.db
 /packages
+/CasperJsSpiderWebApi/bin
+/CasperJsSpiderWebApi/obj
+/CasperJsSpiderWebApi/CasperJsSpiderWebApi.csproj.user
