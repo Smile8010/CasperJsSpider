@@ -11,7 +11,7 @@ namespace CasperJsSpider.Repository.Repository
 {
     public class ProductRepository : BaseRepository<Product>
     {
-        public void AddRange(List<Product> list)
+        public new void AddRange(List<Product> list)
         {
             using (DbContext Context = DbContextFactory.Context)
             {

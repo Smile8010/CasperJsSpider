@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Owin;
 using System.Linq;
+using System.IO;
+using CasperJsSpider.Comom;
 
 [assembly: OwinStartup(typeof(CasperJsSpiderWebApi.Startup))]
 
@@ -20,6 +22,8 @@ namespace CasperJsSpiderWebApi
         {
             // 有关如何配置应用程序的详细信息，请访问 https://go.microsoft.com/fwlink/?LinkID=316888
             app.UseWebApi(WebApiConfig.OwinWebApiConfiguration(new HttpConfiguration()));
+
+            app.Use<RequestFileMiddleware>();
         }
     }
 
@@ -165,5 +169,71 @@ namespace CasperJsSpiderWebApi
         {
             return type.Namespace == toCompare.Namespace && type.Name == toCompare.Name;
         }
+    }
+
+    /// <summary>
+    /// 请求文件处理中间件
+    /// </summary>
+    public class RequestFileMiddleware : OwinMiddleware
+    {
+        /// <summary>
+        /// 构造函数，第一个参数必须为 OwinMiddleware对象 ;第一个参数是固定的，后边还可以添加自定义的其它参数
+        /// </summary>
+        /// <param name="next">下一个中间件</param>
+        public RequestFileMiddleware(OwinMiddleware next)
+            : base(next)
+        {
+
+        }
+
+        /// <summary>
+        /// 处理用户请求的具体方法，该方法是必须的
+        /// </summary>
+        /// <param name="context">OwinContext对象</param>
+        /// <returns></returns>
+        public override Task Invoke(IOwinContext context)
+        {
+            //获取物理文件路径
+            var path = GetFilePath(context.Request.Path.Value);
+            //验证路径是否存在
+            if (File.Exists(path))
+            {
+                return SetResponse(context, path);
+            }
+
+            //不存在返回下一个请求
+            return Next.Invoke(context);
+        }
+
+        public static string GetFilePath(string relPath)
+        {
+            return Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory
+                , AppConfig.GetValue("SiteDir")
+                , relPath.TrimStart('/').Replace('/', '\\'));
+        }
+
+        public Task SetResponse(IOwinContext context, string path)
+        {
+            var perfix = Path.GetExtension(path);
+            if (perfix == ".html")
+            {
+                context.Response.ContentType = "text/html; charset=utf-8";
+            }
+            else if (perfix == ".js")
+            {
+                context.Response.ContentType = "application/x-javascript";
+            }
+            else if (perfix == ".css")
+            {
+                context.Response.ContentType = "atext/css";
+            }
+            else if (perfix == ".json")
+            {
+                context.Response.ContentType = "application/json";
+            }
+            return context.Response.WriteAsync(File.ReadAllText(path));
+        }
+
     }
 }
