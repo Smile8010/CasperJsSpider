@@ -1,0 +1,6 @@
+﻿.pre-line2 { padding:0 5px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.pointer{ cursor:pointer }
+.blue_action{ color:#459ae9;text-decoration:none;  }
+.blue_action:hover,.blue_action_active{ color:#f60; }
+.err_tip{ color: #B03A5B; }
+.hide{ display:none; }

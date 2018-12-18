@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <title></title>
     <link rel="stylesheet" href="Scripts/element-ui-2.4.5/index.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.4.5/theme-chalk/index.css"/>-->
     <style type="text/css">
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f2f2f2; }
@@ -34,10 +35,10 @@
                                     <span slot="title">{{menu.Name}}</span>
                                 </template>
                                 <template>
-                                    <el-menu-item :index="(menuIndex+1)+'-1'" @click="golist" :data-index="(menuIndex+1)+'-1'" :data-id="menu.ID">{{menu.Name}}</el-menu-item>
+                                    <el-menu-item :index="(menuIndex+1)+'-1'" @click="gochart" :data-index="(menuIndex+1)+'-1'" :data-id="menu.ID">{{menu.Name}}</el-menu-item>
                                 </template>
                                 <template v-for="(subMenu, subMenuIndex) in menu.SubMenuList">
-                                    <el-menu-item :index="((menuIndex+1)+'-'+(subMenuIndex+2))" @click="golist" :data-index="((menuIndex+1)+'-'+(subMenuIndex+2))" :data-id="subMenu.ID">&nbsp;&nbsp;&nbsp;&nbsp;{{subMenu.Name}}</el-menu-item>
+                                    <el-menu-item :index="((menuIndex+1)+'-'+(subMenuIndex+2))" @click="gochart" :data-index="((menuIndex+1)+'-'+(subMenuIndex+2))" :data-id="subMenu.ID">&nbsp;&nbsp;&nbsp;&nbsp;{{subMenu.Name}}</el-menu-item>
                                 </template>
                             </el-submenu>
                             <el-menu-item :index="menuIndex+1+''" v-else>
@@ -55,12 +56,14 @@
     <script type="text/javascript" src="Scripts/vue-2.5.17/vue.js"></script>
     <script type="text/javascript" src="Scripts/vue-router-3.0.1/vue-router.js"></script>
     <script type="text/javascript" src="Scripts/element-ui-2.4.5/index.js"></script>
+    <script type="text/javascript" src="Scripts/yepnope/yepnope-2.0.0.min.js"></script>
     <script type="text/javascript" src="Scripts/Utils.js"></script>
+    <script type="text/javascript" src="Scripts/vue-component/chart.js"></script>
     <script type="text/javascript">
         $(function () {
             ({
                 router: null,
-                vm:null,
+                vm: null,
                 createVue: function () {
                     this.router = new VueRouter({
                         routes: [
@@ -72,8 +75,8 @@
                             },
                             // 动态路径参数 以冒号开头
                             {
-                                path: '/list', component: {
-                                    template: '<catalog-product-list></catalog-product-list>'
+                                path: '/chart', component: {
+                                    template: '<chart></chart>'
                                 }
                             }
                         ]
@@ -82,16 +85,16 @@
                         el: '#app',
                         data: {
                             memuList: [],
-                            loading:true,
+                            loading: true,
                             navselected: ''
                         },
                         //store: store,
                         router: this.router,
                         methods: {
-                            golist: function (that) {
+                            gochart: function (that) {
                                 var el = that.$el;
                                 this.$router.push({
-                                    path: '/list',
+                                    path: '/chart',
                                     query: {
                                         id: el.getAttribute('data-id'),
                                         index: el.getAttribute('data-index')
@@ -99,17 +102,17 @@
                                 })
                             }
                         }
-                    });
+                    });  
 
                     return this;
                 },
                 createMenu: function () {
                     Utils.get('/api/menu', null, function (rs) {
                         if (rs.Success) {
-                            this.vm.data.memuList = rs.Data;
-                            this.vm.data.loading = false;
+                            this.vm.memuList = rs.Data;
+                            this.vm.loading = false;
                         } else {
-                            this.vm.$alert(rs.Msg,"错误消息");
+                            this.vm.$alert(rs.Msg, "错误消息");
                         }
                     }.bind(this));
                     return this;
@@ -118,7 +121,7 @@
                     //创建Vue
                     this.createVue()
                         .createMenu();
-                   
+
                 }
             }).run();
         });

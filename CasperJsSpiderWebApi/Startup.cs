@@ -11,6 +11,8 @@ using Owin;
 using System.Linq;
 using System.IO;
 using CasperJsSpider.Comom;
+using Beginor.Owin.StaticFile;
+using System.Collections.Generic;
 
 [assembly: OwinStartup(typeof(CasperJsSpiderWebApi.Startup))]
 
@@ -23,7 +25,38 @@ namespace CasperJsSpiderWebApi
             // 有关如何配置应用程序的详细信息，请访问 https://go.microsoft.com/fwlink/?LinkID=316888
             app.UseWebApi(WebApiConfig.OwinWebApiConfiguration(new HttpConfiguration()));
 
-            app.Use<RequestFileMiddleware>();
+            //app.Use<RequestFileMiddleware>();
+
+            app.UseStaticFile(new StaticFileMiddlewareOptions
+            {
+                RootDirectory = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory
+                , AppConfig.GetValue("SiteDir")),
+                DefaultFile = "index.html",
+                EnableETag = true,
+                EnableHtml5LocationMode = true,
+                MimeTypeProvider = new MimeTypeProvider(new Dictionary<string, string>
+                    {
+                        { ".html", "text/html" },
+                        { ".htm", "text/html" },
+                        { ".dtd", "text/xml" },
+                        { ".xml", "text/xml" },
+                        { ".ico", "image/x-icon" },
+                        { ".css", "text/css" },
+                        { ".js", "application/javascript" },
+                        { ".json", "application/json" },
+                        { ".jpg", "image/jpeg" },
+                        { ".png", "image/png" },
+                        { ".gif", "image/gif" },
+                        { ".config", "text/xml" },
+                        { ".woff2", "application/font-woff2"},
+                        { ".eot", "application/vnd.ms-fontobject" },
+                        { ".svg", "image/svg+xml" },
+                        { ".woff", "font/x-woff" },
+                        { ".txt", "text/plain" },
+                        { ".log", "text/plain" }
+                    })
+            });
         }
     }
 
@@ -216,22 +249,23 @@ namespace CasperJsSpiderWebApi
         public Task SetResponse(IOwinContext context, string path)
         {
             var perfix = Path.GetExtension(path);
-            if (perfix == ".html")
+            string contentType = "application/octet-stream";
+            switch (perfix)
             {
-                context.Response.ContentType = "text/html; charset=utf-8";
+                case ".html":
+                    contentType = "text/html; charset=utf-8";
+                    break;
+                case ".js":
+                    contentType = "application/x-javascript";
+                    break;
+                case ".css":
+                    contentType = "text/css";
+                    break;
+                case ".json":
+                    contentType = "application/json";
+                    break;
             }
-            else if (perfix == ".js")
-            {
-                context.Response.ContentType = "application/x-javascript";
-            }
-            else if (perfix == ".css")
-            {
-                context.Response.ContentType = "atext/css";
-            }
-            else if (perfix == ".json")
-            {
-                context.Response.ContentType = "application/json";
-            }
+            context.Response.ContentType = contentType;
             return context.Response.WriteAsync(File.ReadAllText(path));
         }
 

@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Beginor.Owin.StaticFile, Version=0.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Beginor.Owin.StaticFile.0.3.1\lib\net45\Beginor.Owin.StaticFile.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -110,8 +113,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Pages\Css\chart.css" />
     <Content Include="Pages\index.html" />
-    <Content Include="Pages\Scripts\echarts-2.2.7\echarts-all.js" />
+    <Content Include="Pages\Scripts\echarts\4.2.0\echarts-all.js" />
+    <Content Include="Pages\Scripts\echarts\echarts-2.2.7\echarts-all.js" />
     <Content Include="Pages\Scripts\element-ui-2.4.5\index.css" />
     <Content Include="Pages\Scripts\element-ui-2.4.5\index.js" />
     <Content Include="Pages\Scripts\jquery\jquery-1.12.4.min.js" />
@@ -119,9 +124,12 @@
     <Content Include="Pages\Scripts\Utils.js" />
     <Content Include="Pages\Scripts\vue-2.5.17\vue.js" />
     <Content Include="Pages\Scripts\vue-component\catalog-product-list.js" />
+    <Content Include="Pages\Scripts\vue-component\chart.js" />
     <Content Include="Pages\Scripts\vue-component\list.js" />
     <Content Include="Pages\Scripts\vue-router-3.0.1\vue-router.js" />
     <Content Include="Pages\Scripts\vuex-3.0.1\vuex.js" />
+    <Content Include="Pages\Scripts\yepnope\yepnope-2.0.0.js" />
+    <Content Include="Pages\Scripts\yepnope\yepnope-2.0.0.min.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\Html\" />

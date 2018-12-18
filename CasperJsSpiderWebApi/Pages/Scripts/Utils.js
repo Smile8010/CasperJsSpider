@@ -21,7 +21,6 @@
                 dataType: 'json',
                 error: this.emptyFn,
                 success: successFn ? function (data, textStatus, jqXHR) {
-                    console.log(this);
                     if (typeof options.dataType != 'undefined' && options.dataType != 'json') {
                         try { data = jQuery.parseJSON(data); } catch (ex) { }
                     }

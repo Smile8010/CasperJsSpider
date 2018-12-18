@@ -45,7 +45,8 @@ function addStep() {
                 metadata = JSON.parse(firstDivDom.getAttribute('data-p13n-asin-metadata'));
                 nameDom = tempDom.querySelector('.p13n-sc-truncated');
                 priceDom = tempDom.querySelector('.p13n-sc-price');
-                imgDom = tempDom.querySelector('.a-thumbnail-left');
+                //imgDom = tempDom.querySelector('.a-thumbnail-left');
+                imgDom = tempDom.querySelector('img');
                 linkDom = tempDom.querySelector('.a-link-normal');
                 rankDom = tempDom.querySelector('.zg_rankNumber');
                 findArray.push({
