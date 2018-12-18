@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Pages\Css\chart.css" />
+    <Content Include="Pages\Images\nopic.jpg" />
     <Content Include="Pages\index.html" />
     <Content Include="Pages\Scripts\echarts\4.2.0\echarts-all.js" />
     <Content Include="Pages\Scripts\echarts\echarts-2.2.7\echarts-all.js" />

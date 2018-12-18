@@ -82,8 +82,9 @@
                     <el-header style="height:85px;">\
                         <el-row id="products">\
                             <template v-for="(itemN,indexN) in queryNameList">\
-                                <el-col :span="4" :data-id="itemN.ID" class="pre-line2 pointer blue_action" :title="itemN.Name" @click.native="onLoadChart">\
-                                    {{itemN.Name}}\
+                                <el-col :span="4" :data-id="itemN.ID" class="pointer blue_action" :title="itemN.Name" @click.native="onLoadChart">\
+                                    <div class="product_img"><img :src="itemN.ImgPath" onerror="javascript:this.onerror=null;this.src=\'/Pages/Images/nopic.jpg\'" /></div>\
+                                    <div class="pre-line2">{{itemN.Name}}</div>\
                                 </el-col>\
                             </template>\
                         </el-row>\
@@ -143,6 +144,9 @@
         }
         , onLoadChart: function (e) {
             var $el = $(e.target);
+            if (!$el.hasClass('blue_action')) {
+                $el = $el.parents('.blue_action:first');
+            }
             if ($el.hasClass('blue_action_active')) { return; }
             $el.addClass('blue_action_active').siblings().removeClass('blue_action_active');
             this.chartloading = true;

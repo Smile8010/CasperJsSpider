@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="AmazonJapanCatalogSpider.cs" />
     <Compile Include="AmazonJapanRankSpider.cs" />
+    <Compile Include="AmzaonJapanCompletion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

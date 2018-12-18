@@ -69,32 +69,37 @@ namespace CasperJsSpiderWebApi.Controllers
                 endDate = DateTime.Now;
             }
 
-            //DateTime endDate = DateTime.Now;
-            //if (!startDate.HasValue)
-            //{
-            //    startDate = DateTime.Now.AddDays(-7);
-            //}
-            //else {
-            //    endDate = startDate.Value.AddDays(7);
-            //}
-
             using (DbContext db = DbContextFactory.Context)
             {
                 //找出mapName
                 var dbSet = db.Set<SysCatalog>();
                 SysCatalog entity = dbSet.First(o => o.ID == catalogId);
 
-                string querySql = $@"SELECT DISTINCT p.ID,p.Name
+                string querySql = $@"SELECT DISTINCT p.ID
                                      FROM {entity.CatalogProductTableName} map 
                                      JOIN tb_Sys_Product p ON map.ProductID = p.ID
                                      WHERE p.CatalogID = @CatalogID AND p.Name LIKE @Name AND map.CreateTime BETWEEN '{startDate.Value.ToString("yyyy-MM-dd")} 00:00:00' AND '{endDate.Value.ToString("yyyy-MM-dd")} 23:59:59'  
                                      ORDER BY map.CreateTime DESC
                                      LIMIT 6 ";
-
-                result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql, new SQLiteParameter[] {
+                List<string> queryIDs = db.Database.SqlQuery<string>(querySql, new SQLiteParameter[] {
                       new SQLiteParameter("@CatalogID",catalogId),
                       new SQLiteParameter("@Name",$"%{name}%")
                 }).ToList();
+
+                if (queryIDs.Count > 0)
+                {
+                    querySql = $@"SELECT p.ID,p.Name,p.ImgPath
+                              FROM tb_Sys_Product p
+                              WHERE p.ID IN ( '{string.Join("','", queryIDs.ToArray())}' )";
+                    result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql).ToList();
+                }
+                else {
+                    result.Data = new List<string>();
+                }   
+                //result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql, new SQLiteParameter[] {
+                //      new SQLiteParameter("@CatalogID",catalogId),
+                //      new SQLiteParameter("@Name",$"%{name}%")
+                //}).ToList();
 
 
                 return result;
@@ -114,16 +119,6 @@ namespace CasperJsSpiderWebApi.Controllers
         public Result<object> GetSysCatalogProductWeekRanking(string catalogId, string productId, DateTime? startDate,DateTime? endDate)
         {
             Result<object> result = new Result<object>(true);
-
-            //DateTime endDate = DateTime.Now;
-            //if (!startDate.HasValue)
-            //{
-            //    startDate = DateTime.Now.AddDays(-7);
-            //}
-            //else
-            //{
-            //    endDate = startDate.Value.AddDays(7);
-            //}
 
             if (!startDate.HasValue)
             {

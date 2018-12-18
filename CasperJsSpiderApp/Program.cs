@@ -39,7 +39,8 @@ namespace CasperJsSpiderApp
             //Logger.Info("运行开始！");
             AmazonJapanCatalogSpider.Run();
             AmazonJapanRankSpider.Run();
-            //Logger.Info("运行结束！");
+             
+
         }
 
         /// <summary>
