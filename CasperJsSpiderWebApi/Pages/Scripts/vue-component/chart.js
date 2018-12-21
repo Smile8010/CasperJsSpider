@@ -175,7 +175,7 @@
                     }
                     this.echarts.setOption({
                         title: {
-                            text: '一周排名',
+                            text: '排名',
                             subtext: '波动情况'
                         },
                         tooltip: {
