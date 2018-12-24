@@ -4,7 +4,10 @@
         return {
             loading: false,
             chartloading: false,
-            hasproduct: false,
+            hasproduct: true,
+            pageSize: 6,
+            totalCount: 0,
+            currentPage:1,
             queryForm: {
                 Name: '',
                 DatePeriod: [new Date(date.setTime(date.getTime() - 3600 * 1000 * 24 * 90)), new Date()]
@@ -79,16 +82,24 @@
                 </el-header>\
                 <el-main style="height:100%;width:100%;padding-top:0;">\
                   <el-container  style="height:100%;width:100%;">\
-                    <el-header style="height:85px;">\
-                        <el-row id="products">\
-                            <template v-for="(itemN,indexN) in queryNameList">\
-                                <el-col :span="4" :data-id="itemN.ID" class="pointer blue_action" :title="itemN.Name" @click.native="onLoadChart">\
-                                    <div class="product_img"><img :src="itemN.ImgPath" onerror="javascript:this.onerror=null;this.src=\'/Pages/Images/nopic.jpg\'" /></div>\
-                                    <div class="pre-line2">{{itemN.Name}}</div>\
+                    <el-header style="height:85px;" id="products">\
+                        <template v-if="hasproduct">\
+                            <el-row>\
+                                <template v-for="(itemN,indexN) in queryNameList">\
+                                    <el-col :span="4" :data-id="itemN.ID" class="pointer blue_action" :title="itemN.Name" @click.native="onLoadChart">\
+                                        <div class="product_img"><img :src="itemN.ImgPath" onerror="javascript:this.onerror=null;this.src=\'/Pages/Images/nopic.jpg\'" /></div>\
+                                        <div class="pre-line2">{{itemN.Name}}</div>\
+                                    </el-col>\
+                                </template>\
+                            </el-row>\
+                            <el-row v-if="queryNameList.length > 0">\
+                                <el-col :span="12">\
+                                    <el-pagination :page-size="pageSize" :current-page.sync="currentPage" :total ="totalCount" :page-count="10" layout="total,prev, pager, next,jumper" @current-change="loadSearchName">\
+                                    </el-pagination>\
                                 </el-col>\
-                            </template>\
-                        </el-row>\
-                        <el-row :class="{hide:hasproduct}">\
+                            </el-row>\
+                        </template>\
+                        <el-row v-else>\
                             <el-col :span="24" class="err_tip">没有该产品的相关信息！</el-col>\
                         </el-row>\
                     </el-header>\
@@ -106,22 +117,23 @@
             this.echarts = echarts.init(document.getElementById('main'));
             this.hasproduct = true;
             this.echarts.clear();
+            //this.loadSearchName(1);
         },
-        loadSearchName: function () {
+        loadSearchName: function (pageIndex) {
             this.loading = true
-            this.queryNameList = [];
-            //$('#products [data-id]').removeClass('blue_action_active');
-            this.echarts.clear();
             this.hasproduct = true;
             var params = {
                 catalogId: this.$route.query.id,
-                name: this.queryForm.Name
+                name: this.queryForm.Name,
+                start: (pageIndex -1)* this.pageSize,
+                limit: this.pageSize
             };
             if (this.queryForm.DatePeriod
                 && this.queryForm.DatePeriod.length > 1) {
                 params.startDate = this.dateFormat(this.queryForm.DatePeriod[0]);
                 params.endDate = this.dateFormat(this.queryForm.DatePeriod[1])
             }
+            $('#products .blue_action_active').removeClass('blue_action_active');
             Utils.get('/api/searchproductname', params, function (rs) {
                 this.loading = false
                 if (rs.Success) {
@@ -131,13 +143,15 @@
                     } else {
                         this.hasproduct = false;
                     }
+                    this.totalCount = rs.Total;
                 } else {
                     this.$message.error(rs.Msg);
                 }
-            }, { context: this });
+            }, {  context: this });
         },
         onSubmit: function () {
-            this.loadSearchName();
+            this.currentPage = 1;
+            this.loadSearchName(1);
         },
         dateFormat: function (date, hours, min, second, ms) {
             return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate(); //new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours || 0, min || 0, second || 0, ms || 0);

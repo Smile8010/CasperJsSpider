@@ -49,13 +49,14 @@ namespace CasperJsSpiderWebApi.Controllers
         /// <param name="startDate"></param>
         /// <returns></returns>
         [HttpGet, Route("api/searchproductname")]
-        public Result<object> GetSysCatalogProductList(string catalogId, string name, DateTime? startDate,DateTime? endDate)
+        public Result<object> GetSysCatalogProductList(string catalogId, string name, DateTime? startDate, DateTime? endDate, int start = 0, int limit = 6)
         {
             Result<object> result = new Result<object>(true);
+
             if (string.IsNullOrEmpty(name))
             {
                 result.Success = false;
-                result.Msg = "请输入产品名称";
+                result.Msg = "请输入要查询的产品名称!";
                 return result;
             }
 
@@ -75,33 +76,62 @@ namespace CasperJsSpiderWebApi.Controllers
                 var dbSet = db.Set<SysCatalog>();
                 SysCatalog entity = dbSet.First(o => o.ID == catalogId);
 
-                string querySql = $@"SELECT DISTINCT p.ID
-                                     FROM {entity.CatalogProductTableName} map 
-                                     JOIN tb_Sys_Product p ON map.ProductID = p.ID
-                                     WHERE p.CatalogID = @CatalogID AND p.Name LIKE @Name AND map.CreateTime BETWEEN '{startDate.Value.ToString("yyyy-MM-dd")} 00:00:00' AND '{endDate.Value.ToString("yyyy-MM-dd")} 23:59:59'  
-                                     ORDER BY map.CreateTime DESC
-                                     LIMIT 6 ";
-                List<string> queryIDs = db.Database.SqlQuery<string>(querySql, new SQLiteParameter[] {
-                      new SQLiteParameter("@CatalogID",catalogId),
-                      new SQLiteParameter("@Name",$"%{name}%")
-                }).ToList();
-
-                if (queryIDs.Count > 0)
-                {
-                    querySql = $@"SELECT p.ID,p.Name,p.ImgPath
-                              FROM tb_Sys_Product p
-                              WHERE p.ID IN ( '{string.Join("','", queryIDs.ToArray())}' )";
-                    result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql).ToList();
-                }
-                else {
-                    result.Data = new List<string>();
-                }   
-                //result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql, new SQLiteParameter[] {
+                //string querySql = $@"SELECT DISTINCT p.ID
+                //                     FROM {entity.CatalogProductTableName} map 
+                //                     JOIN tb_Sys_Product p ON map.ProductID = p.ID
+                //                     WHERE p.CatalogID = @CatalogID AND p.Name LIKE @Name AND map.CreateTime BETWEEN '{startDate.Value.ToString("yyyy-MM-dd")} 00:00:00' AND '{endDate.Value.ToString("yyyy-MM-dd")} 23:59:59'  
+                //                     ORDER BY map.CreateTime DESC
+                //                     LIMIT 6 ";
+                //List<string> queryIDs = db.Database.SqlQuery<string>(querySql, new SQLiteParameter[] {
                 //      new SQLiteParameter("@CatalogID",catalogId),
                 //      new SQLiteParameter("@Name",$"%{name}%")
                 //}).ToList();
 
+                string fromSql, whereSql;
 
+                fromSql = "FROM tb_Sys_Product p ";
+
+                List<SQLiteParameter> SQLiteParamList = new List<SQLiteParameter>() {
+                     new SQLiteParameter("@CatalogID",catalogId)
+                };
+                whereSql = "WHERE p.CatalogID = @CatalogID ";
+                if (!string.IsNullOrEmpty(name))
+                {
+                    SQLiteParamList.Add(new SQLiteParameter("@Name", $"%{name}%"));
+                    whereSql += "AND p.Name LIKE @Name ";
+                }
+
+                
+                whereSql += $"AND EXISTS ( SELECT 1 FROM  {entity.CatalogProductTableName} map WHERE map.ProductID = p.ID AND map.CreateTime BETWEEN '{startDate.Value.ToString("yyyy-MM-dd")} 00:00:00' AND '{endDate.Value.ToString("yyyy-MM-dd")} 23:59:59' ) ";
+
+
+                string querySql = $@"SELECT p.ID {fromSql} {whereSql}
+                                     ORDER BY p.CreateTime
+                                     LIMIT {limit}
+                                     OFFSET {start};";
+
+                SQLiteParameter[] SQLiteParameters = SQLiteParamList.ToArray();
+
+                List<string> queryIDs = db.Database.SqlQuery<string>(querySql, SQLiteParameters).ToList();
+                result.Total = 0;
+                if (queryIDs.Count > 0)
+                {
+                    querySql = $@"SELECT p.ID,p.Name,p.ImgPath
+                              FROM tb_Sys_Product p
+                              WHERE p.ID IN ( '{string.Join("','", queryIDs.ToArray())}' );";
+                    result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql).ToList();
+                    querySql = $"SELECT COUNT(1) {fromSql} {whereSql};";
+                    result.Total = db.Database.SqlQuery<int>(querySql, SQLiteParameters).FirstOrDefault();
+                }
+                else
+                {
+                    result.Data = new List<string>();
+
+                }
+                //result.Data = db.Database.SqlQuery<SysCatalogProductNameWeekRanking>(querySql, new SQLiteParameter[] {
+                //      new SQLiteParameter("@CatalogID",catalogId),
+                //      new SQLiteParameter("@Name",$"%{name}%")
+                //}).ToList();
                 return result;
             }
 
@@ -116,7 +146,7 @@ namespace CasperJsSpiderWebApi.Controllers
         /// <param name="startDate">开始时间</param>
         /// <returns></returns>
         [HttpGet, Route("api/searchproductweekchart")]
-        public Result<object> GetSysCatalogProductWeekRanking(string catalogId, string productId, DateTime? startDate,DateTime? endDate)
+        public Result<object> GetSysCatalogProductWeekRanking(string catalogId, string productId, DateTime? startDate, DateTime? endDate)
         {
             Result<object> result = new Result<object>(true);
 
