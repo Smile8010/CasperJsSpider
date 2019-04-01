@@ -13,7 +13,7 @@ namespace CasperJsSpiderWebApi
     {
         static void Main(string[] args)
         {
-            string hostAddress = AppConfig.GetValue("hostAddress", "http://localhost:12345");
+            string hostAddress = AppConfig.GetValue("hostAddress", AppConfig.GetValue("Domain"));
             using (WebApp.Start(hostAddress))
             {
                 Console.WriteLine($"程序已启动，地址：{hostAddress}");
